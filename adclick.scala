@@ -29,3 +29,27 @@ val timedata = data.withColumn("Hour",hour(data("Timestamp")))
 val logregdata = (timedata.select(data("Clicked on Ad").as("label"),
                 $"Daily Time Spent on Site", $"Age", $"Area Income",
                 $"Daily Internet Usage",$"Male"))
+
+import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.linalg.Vectors
+
+val assembler = (new VectorAssembler().setInputCols(
+                  Array("Daily Time Spent on Site", "Age", "Area Income",
+                  "Daily Internet Usage","Male")).setOutputCol("features")) // we don't need the "$" sign because we just need the string (study scala fundamentals)
+val Array(training, test) = logregdata.randomSplit(Array(0.7,0.3), seed = 12345)
+
+import org.apache.spark.ml.Pipeline
+
+val lr = new LogisticRegression()
+val pipeline = new Pipeline().setStages(Array(assembler,lr))
+val model = pipeline.fit(training)
+val results = model.transform(test)
+
+import org.apache.spark.mllib.evaluation.MulticlassMetrics
+
+val predictionAndLabels = results.select($"prediction",$"label").as[(Double,Double)].rdd
+val metrics = new MulticlassMetrics(predictionAndLabels)
+
+println("Confusion Matrix")
+println(metrics.confusionMatrix)
+
