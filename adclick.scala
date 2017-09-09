@@ -35,7 +35,7 @@ import org.apache.spark.ml.linalg.Vectors
 
 val assembler = (new VectorAssembler().setInputCols(
                   Array("Daily Time Spent on Site", "Age", "Area Income",
-                  "Daily Internet Usage","Male")).setOutputCol("features")) // we don't need the "$" sign because we just need the string (study scala fundamentals)
+                  "Daily Internet Usage","Male")).setOutputCol("features"))
 val Array(training, test) = logregdata.randomSplit(Array(0.7,0.3), seed = 12345)
 
 import org.apache.spark.ml.Pipeline
